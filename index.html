@@ -1752,9 +1752,12 @@ select option:checked { background: color-mix(in srgb, var(--accent) 35%, var(--
 .look-preview .flag-image-card img { width: 150px; height: auto; max-width: 100%; }
 
 /* ===== LEADERBOARDS ===== */
-.lb-name-row { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin: 14px 0; }
-.lb-name-row input { flex: 1; min-width: 180px; max-width: 320px; padding: 10px 14px; border: 1px solid var(--line); border-radius: var(--r-sm); background: var(--toggle-bg); color: var(--text); font-weight: 700; }
-.lb-name-row input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 28%, transparent); }
+.lb-box { margin: 14px 0; }
+.lb-form { display: grid; gap: 10px; max-width: 360px; margin-top: 12px; }
+.lb-input { width: 100%; padding: 10px 14px; border: 1px solid var(--line); border-radius: var(--r-sm); background: var(--toggle-bg); color: var(--text); font-weight: 700; }
+.lb-input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 28%, transparent); }
+.lb-notice { margin: 10px 0; padding: 10px 14px; border: 1px solid color-mix(in srgb, var(--accent-2) 55%, transparent); border-radius: var(--r-sm); background: color-mix(in srgb, var(--accent-2) 12%, transparent); font-weight: 700; }
+.lb-notice.error { border-color: color-mix(in srgb, var(--danger) 65%, transparent); background: color-mix(in srgb, var(--danger) 14%, transparent); }
 .lb-boards { flex-wrap: wrap; width: fit-content; max-width: 100%; margin: 6px 0 10px; }
 .lb-list { display: grid; gap: 8px; margin: 12px 0 0; padding: 0; list-style: none; }
 .lb-row { display: grid; grid-template-columns: 52px minmax(0, 1fr) auto; align-items: center; gap: 12px; padding: 12px 16px; border: 1px solid var(--line); border-radius: var(--r-sm); background: var(--toggle-bg); }
@@ -1764,7 +1767,7 @@ select option:checked { background: color-mix(in srgb, var(--accent) 35%, var(--
 .lb-score { color: var(--accent-2); font-weight: 900; font-variant-numeric: tabular-nums; }
 .lb-row.me { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 14%, transparent); }
 .lb-gap { margin: 2px 0; color: var(--muted); text-align: center; list-style: none; }
-.lb-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
+.lb-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: 12px; }
 
 </style>
   </head>
@@ -2013,10 +2016,52 @@ select option:checked { background: color-mix(in srgb, var(--accent) 35%, var(--
           <p class="eyebrow">Compete</p>
           <h2>Leaderboards</h2>
           <p id="lb-status" class="hint-text"></p>
-          <div class="lb-name-row">
-            <input id="lb-name" type="text" maxlength="20" autocomplete="off" spellcheck="false" placeholder="Your display name" aria-label="Display name" />
-            <button id="lb-name-save" class="primary-button" type="button">Save name</button>
+          <p id="lb-notice" class="lb-notice hidden" role="status"></p>
+
+          <div id="lb-auth" class="lb-box hidden">
+            <div class="mode-toggle lb-boards" role="group" aria-label="Account">
+              <button class="mode-button active" type="button" data-auth="login">Log in</button>
+              <button class="mode-button" type="button" data-auth="signup">Create account</button>
+            </div>
+            <div class="lb-form">
+              <input id="lb-email" class="lb-input" type="email" autocomplete="email" placeholder="Email" aria-label="Email" />
+              <div id="lb-username-wrap" class="hidden">
+                <input id="lb-username" class="lb-input" type="text" maxlength="20" autocomplete="off" spellcheck="false" placeholder="Username (3-20: letters, numbers, _ . -)" aria-label="Username" />
+              </div>
+              <input id="lb-password" class="lb-input" type="password" autocomplete="current-password" placeholder="Password (8+ characters)" aria-label="Password" />
+              <div class="lb-actions">
+                <button id="lb-auth-go" class="primary-button" type="button">Log in</button>
+                <button id="lb-forgot" class="ghost-button" type="button">Forgot password?</button>
+              </div>
+            </div>
           </div>
+
+          <div id="lb-setup" class="lb-box hidden">
+            <p class="hint-text">One more step. Choose your username. It is shown on the boards and cannot be changed later.</p>
+            <div class="lb-form">
+              <input id="lb-setup-name" class="lb-input" type="text" maxlength="20" autocomplete="off" spellcheck="false" placeholder="Username (3-20: letters, numbers, _ . -)" aria-label="Username" />
+              <div class="lb-actions">
+                <button id="lb-setup-go" class="primary-button" type="button">Save username</button>
+                <button class="ghost-button" type="button" data-lb-logout>Log out</button>
+              </div>
+            </div>
+          </div>
+
+          <div id="lb-account" class="lb-box hidden">
+            <div class="lb-actions">
+              <span>Signed in as <strong id="lb-account-name"></strong></span>
+              <button class="ghost-button" type="button" data-lb-logout>Log out</button>
+            </div>
+          </div>
+
+          <div id="lb-recovery" class="lb-box hidden">
+            <p class="hint-text">Choose a new password for your account.</p>
+            <div class="lb-form">
+              <input id="lb-newpass" class="lb-input" type="password" autocomplete="new-password" placeholder="New password (8+ characters)" aria-label="New password" />
+              <div class="lb-actions"><button id="lb-newpass-go" class="primary-button" type="button">Save password</button></div>
+            </div>
+          </div>
+
           <div id="lb-boards" class="mode-toggle lb-boards" role="group" aria-label="Choose a leaderboard">
             <button class="mode-button active" type="button" data-board="run">Flag Run</button>
             <button class="mode-button" type="button" data-board="mastery">Mastery</button>
@@ -2025,10 +2070,11 @@ select option:checked { background: color-mix(in srgb, var(--accent) 35%, var(--
           </div>
           <p id="lb-note" class="hint-text"></p>
           <ol id="lb-list" class="lb-list"></ol>
+          <p id="lb-mine" class="hint-text"></p>
           <div class="lb-actions">
             <button id="lb-refresh" class="ghost-button" type="button">Refresh</button>
           </div>
-          <p class="hint-text">Scores are public. Only your display name and best scores are stored. No email or password is needed.</p>
+          <p class="hint-text">Scores are public: others see only your username and scores, never your email.</p>
         </article>
       </section>
 
@@ -8365,14 +8411,16 @@ function bindEvents() {
   }, getPlayableFlags);
 }
 
-// ===== LEADERBOARDS (Supabase) =====
+// ===== LEADERBOARDS (Supabase accounts) =====
 // The key below is the public "publishable" key: it is meant to live in site code.
-// Safety comes from the database rules (read-only table, scores only via submit_score()).
+// Safety comes from the database rules: tables are read-only, writes go through functions
+// that check the signed-in account.
 const LB_URL = 'https://mypvpnlwkindhulwlvhg.supabase.co';
 const LB_KEY = 'sb_publishable_XdCdMNO1NGkaBhP9h9H_9A_ADZ1eJD-';
 const LB_SESSION_KEY = 'flagtrainer-lb-session';
-const LB_NAME_KEY = 'flagtrainer-lb-name';
 const LB_FLAGLE_KEY = 'flagtrainer-lb-flagle-today';
+const LB_USERNAME_RE = /^[A-Za-z0-9_.-]{3,20}$/;
+const LB_EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const lbUtcToday = () => new Date().toISOString().slice(0, 10);
 const LB_BOARDS = {
   run: { label: 'Flag Run', unit: 'pts', note: 'Best Journey run score.', period: () => 'all' },
@@ -8380,11 +8428,9 @@ const LB_BOARDS = {
   quiz: { label: 'Quiz', unit: 'in a row', note: 'Best Quiz streak.', period: () => 'all' },
   flagle: { label: 'Flagle', unit: '%', note: "Today's best Flagle game, as a percent. Resets at 00:00 UTC.", period: lbUtcToday },
 };
-const lb = { board: 'run', pending: {}, timer: null, loadToken: 0 };
-
-const lbName = () => String(lsGet(LB_NAME_KEY) || '').trim();
-const lbClean = (value) => String(value || '').replace(/[\u0000-\u001f\u007f]/g, '').replace(/\s+/g, ' ').trim().slice(0, 20);
+const lb = { board: 'run', pending: {}, upload: {}, timer: null, loadToken: 0, authMode: 'login', recoveryToken: '', sessionJob: null };
 const lbIsObj = (v) => v && typeof v === 'object' && !Array.isArray(v);
+const lbEl = (selector) => document.querySelector(selector);
 
 async function lbFetch(path, options = {}, token = '') {
   const controller = new AbortController();
@@ -8395,50 +8441,121 @@ async function lbFetch(path, options = {}, token = '') {
       signal: controller.signal,
       headers: { apikey: LB_KEY, 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}), ...(options.headers || {}) },
     });
+  } catch (error) {
+    throw new Error('Could not reach the server. Check your connection and try again.');
   } finally { clearTimeout(timer); }
 }
 
-function lbStoreSession(data) {
+async function lbErrText(res) {
+  try {
+    const data = await res.json();
+    return data.message || data.msg || data.error_description || data.error || `Error ${res.status}`;
+  } catch (error) { return `Error ${res.status}`; }
+}
+
+async function lbRpc(name, args, token = '') {
+  const res = await lbFetch(`/rest/v1/rpc/${name}`, { method: 'POST', body: JSON.stringify(args) }, token);
+  if (!res.ok) throw new Error(await lbErrText(res));
+  const text = await res.text();
+  return text ? JSON.parse(text) : null;
+}
+
+// ----- session -----
+function lbStoreSession(data, keep = {}) {
+  const user = data.user || {};
   const session = {
     access_token: data.access_token,
     refresh_token: data.refresh_token,
     expires_at: data.expires_at || Math.floor(Date.now() / 1000) + (data.expires_in || 3600),
-    user_id: data.user && data.user.id,
+    user_id: user.id,
+    email: user.email || keep.email || '',
+    meta_username: (user.user_metadata && user.user_metadata.username) || keep.meta_username || '',
+    username: keep.username || '',
   };
   lsSet(LB_SESSION_KEY, JSON.stringify(session));
   return session;
 }
-const lbLoadSession = () => lsJson(LB_SESSION_KEY, null, (v) => lbIsObj(v) && v.access_token);
+// Sessions from the old anonymous version have no email, so they are ignored.
+const lbLoadSession = () => lsJson(LB_SESSION_KEY, null, (v) => lbIsObj(v) && v.access_token && v.user_id && v.email);
+function lbClearSession() { try { localStorage.removeItem(LB_SESSION_KEY); } catch (error) { /* storage unavailable */ } }
 
-// Players get an invisible anonymous account the first time they submit a score.
-// One shared in-flight request, so parallel submits never create two anonymous accounts.
 function lbSession() {
   if (!lb.sessionJob) lb.sessionJob = lbSessionStart().finally(() => { lb.sessionJob = null; });
   return lb.sessionJob;
 }
 async function lbSessionStart() {
   const saved = lbLoadSession();
-  if (saved && saved.expires_at - Math.floor(Date.now() / 1000) > 60) return saved;
-  if (saved && saved.refresh_token) {
-    const res = await lbFetch('/auth/v1/token?grant_type=refresh_token', { method: 'POST', body: JSON.stringify({ refresh_token: saved.refresh_token }) });
-    if (res.ok) return lbStoreSession(await res.json());
-    if (res.status < 400 || res.status >= 500) throw new Error('refresh failed');
-    // refresh token rejected: fall through and start a new anonymous account
-  }
-  const res = await lbFetch('/auth/v1/signup', { method: 'POST', body: JSON.stringify({ data: {}, gotrue_meta_security: {} }) });
-  if (!res.ok) throw new Error('sign-in failed');
-  return lbStoreSession(await res.json());
+  if (!saved) return null;
+  if (saved.expires_at - Math.floor(Date.now() / 1000) > 60) return saved;
+  const res = await lbFetch('/auth/v1/token?grant_type=refresh_token', { method: 'POST', body: JSON.stringify({ refresh_token: saved.refresh_token }) });
+  if (res.ok) return lbStoreSession(await res.json(), saved);
+  if (res.status >= 400 && res.status < 500) { lbClearSession(); return null; }
+  throw new Error('Could not refresh your login.');
 }
 
-async function lbSubmit(board, score) {
-  const name = lbName();
-  if (!name || !LB_BOARDS[board]) return;
+function lbRememberName(session, name) {
+  session.username = name;
+  lsSet(LB_SESSION_KEY, JSON.stringify(session));
+  return name;
+}
+
+// Finds the account's username, or creates it from the name chosen at sign-up.
+async function lbEnsureProfile() {
   const session = await lbSession();
-  const res = await lbFetch('/rest/v1/rpc/submit_score', {
-    method: 'POST',
-    body: JSON.stringify({ p_board: board, p_period: LB_BOARDS[board].period(), p_name: name, p_score: Math.max(0, Math.round(score)) }),
-  }, session.access_token);
-  if (!res.ok) throw new Error('submit failed');
+  if (!session) return '';
+  if (session.username) return session.username;
+  const res = await lbFetch(`/rest/v1/profiles?user_id=eq.${session.user_id}&select=username`, {}, session.access_token);
+  if (res.ok) {
+    const rows = await res.json();
+    if (rows[0]) return lbRememberName(session, rows[0].username);
+  }
+  if (LB_USERNAME_RE.test(session.meta_username || '')) {
+    try {
+      await lbRpc('create_profile', { p_username: session.meta_username }, session.access_token);
+      return lbRememberName(session, session.meta_username);
+    } catch (error) { /* taken in the meantime: the player picks another */ }
+  }
+  return '';
+}
+
+// ----- account actions -----
+async function lbSignUp(email, username, password) {
+  if ((await lbRpc('username_available', { p_username: username })) !== true) throw new Error('That username is already taken.');
+  const res = await lbFetch('/auth/v1/signup', { method: 'POST', body: JSON.stringify({ email, password, data: { username } }) });
+  if (!res.ok) throw new Error(await lbErrText(res));
+  const data = await res.json();
+  if (!data.access_token) return 'confirm';
+  lbStoreSession(data);
+  await lbEnsureProfile();
+  return 'in';
+}
+
+async function lbLogIn(email, password) {
+  const res = await lbFetch('/auth/v1/token?grant_type=password', { method: 'POST', body: JSON.stringify({ email, password }) });
+  if (!res.ok) throw new Error(await lbErrText(res));
+  lbStoreSession(await res.json());
+  await lbEnsureProfile();
+}
+
+async function lbLogOut() {
+  const session = lbLoadSession();
+  if (session) { try { await lbFetch('/auth/v1/logout', { method: 'POST' }, session.access_token); } catch (error) { /* signing out locally is enough */ } }
+  lbClearSession();
+  lb.pending = {};
+  lb.upload = {};
+  lb.authMode = 'login';
+  lbNotice('');
+  lbRenderAccount();
+  lbShow(lb.board);
+}
+
+// ----- sending scores -----
+async function lbSubmit(board, score) {
+  let session = await lbSession();
+  if (!session) throw new Error('Not logged in.');
+  if (!session.username) { await lbEnsureProfile(); session = await lbSession(); }
+  if (!session || !session.username) throw new Error('Choose a username first.');
+  await lbRpc('submit_score', { p_board: board, p_period: LB_BOARDS[board].period(), p_score: Math.max(0, Math.round(score)) }, session.access_token);
 }
 
 // Scores are batched for a couple of seconds so a streak does not send a request per answer.
@@ -8452,10 +8569,12 @@ function lbQueue(board, score) {
 function lbFlush() {
   clearTimeout(lb.timer);
   lb.timer = null;
-  if (!lbName()) return Promise.resolve([]);
+  if (!lbLoadSession()) return Promise.resolve([]);
   const jobs = Object.entries(lb.pending).map(([board, score]) => {
     delete lb.pending[board];
-    return lbSubmit(board, score).catch(() => { lb.pending[board] = Math.max(lb.pending[board] || 0, score); });
+    return lbSubmit(board, score)
+      .then(() => { lb.upload[board] = { ok: true }; })
+      .catch((error) => { lb.upload[board] = { ok: false, msg: error.message }; lb.pending[board] = Math.max(lb.pending[board] || 0, score); });
   });
   return Promise.all(jobs);
 }
@@ -8467,18 +8586,62 @@ function lbFlagle(pct) {
   lbQueue('flagle', best);
 }
 
-// Re-send current bests (covers progress made before the leaderboard existed, or while offline).
-function lbSyncAll() {
-  lbQueue('run', Math.max(0, ...runData.journey.games.map((g) => g.score || 0)));
-  lbQueue('mastery', FLAGS.filter((f) => state.mastered.has(f.id)).length);
-  lbQueue('quiz', state.quizBestStreak);
+function lbLocalBest(board) {
+  if (board === 'run') return Math.max(0, ...runData.journey.games.map((g) => g.score || 0));
+  if (board === 'mastery') return FLAGS.filter((f) => state.mastered.has(f.id)).length;
+  if (board === 'quiz') return state.quizBestStreak || 0;
   const today = lsJson(LB_FLAGLE_KEY, null, lbIsObj);
-  if (today && today.date === lbUtcToday()) lbQueue('flagle', today.best);
+  return today && today.date === lbUtcToday() ? today.best || 0 : 0;
 }
+// Sends every current best (covers progress made before the leaderboard existed, or while logged out).
+function lbSyncAll() { Object.keys(LB_BOARDS).forEach((board) => lbQueue(board, lbLocalBest(board))); }
 
+// ----- screen -----
 function lbFormat(board, score) {
   const unit = LB_BOARDS[board].unit;
   return unit === '%' ? `${score}%` : `${Number(score).toLocaleString()} ${unit}`;
+}
+
+function lbNotice(text, isError = false) {
+  const box = lbEl('#lb-notice');
+  box.textContent = text;
+  box.classList.toggle('hidden', !text);
+  box.classList.toggle('error', isError);
+}
+
+function lbRenderAccount() {
+  const session = lbLoadSession();
+  const toggle = (selector, on) => lbEl(selector).classList.toggle('hidden', !on);
+  const recovering = !!lb.recoveryToken;
+  toggle('#lb-recovery', recovering);
+  toggle('#lb-auth', !recovering && !session);
+  toggle('#lb-setup', !recovering && !!session && !session.username);
+  toggle('#lb-account', !recovering && !!session && !!session.username);
+  document.querySelectorAll('#lb-auth [data-auth]').forEach((b) => b.classList.toggle('active', b.dataset.auth === lb.authMode));
+  toggle('#lb-username-wrap', lb.authMode === 'signup');
+  lbEl('#lb-auth-go').textContent = lb.authMode === 'signup' ? 'Create account' : 'Log in';
+  lbEl('#lb-password').autocomplete = lb.authMode === 'signup' ? 'new-password' : 'current-password';
+  lbEl('#lb-forgot').classList.toggle('hidden', lb.authMode === 'signup');
+  if (session && session.username) lbEl('#lb-account-name').textContent = session.username;
+  let status = 'Create a free account to put your scores on the boards. The game works fine without one.';
+  if (recovering) status = 'Password reset';
+  else if (session && session.username) status = 'Your best scores are sent automatically while you are logged in.';
+  else if (session) status = 'Almost there. Choose a username to join the boards.';
+  lbEl('#lb-status').textContent = status;
+}
+
+function lbRenderMine() {
+  const board = lb.board;
+  const best = lbLocalBest(board);
+  const session = lbLoadSession();
+  const up = lb.upload[board];
+  let text = `Your best on this device: ${lbFormat(board, best)}.`;
+  if (!best) text += ' Score something in this mode to get on the board.';
+  else if (!session) text += ' Log in to put it on the board.';
+  else if (!session.username) text += ' Choose a username to upload it.';
+  else if (up && !up.ok) text += ` Upload failed: ${up.msg}`;
+  else if (up && up.ok) text += ' Uploaded.';
+  lbEl('#lb-mine').textContent = text;
 }
 
 function lbRow(rank, name, score, board, isMe) {
@@ -8497,37 +8660,27 @@ function lbRow(rank, name, score, board, isMe) {
   return li;
 }
 
-function lbSetStatus(text) {
-  document.querySelector('#lb-status').textContent = text;
-}
-
-function lbRenderName() {
-  const name = lbName();
-  document.querySelector('#lb-name').value = name;
-  lbSetStatus(name ? `Playing as ${name}. Your best scores are sent automatically.` : 'Pick a display name to appear on the boards.');
-}
-
 async function lbShow(board) {
   lb.board = board;
   const token = ++lb.loadToken;
-  const list = document.querySelector('#lb-list');
-  const note = document.querySelector('#lb-note');
+  const list = lbEl('#lb-list');
+  const note = lbEl('#lb-note');
   document.querySelectorAll('#lb-boards .mode-button').forEach((b) => b.classList.toggle('active', b.dataset.board === board));
   const meta = LB_BOARDS[board];
   const period = meta.period();
   note.textContent = `${meta.note} Loading\u2026`;
   list.replaceChildren();
+  lbRenderMine();
   try {
     const query = `/rest/v1/scores?board=eq.${board}&period=eq.${encodeURIComponent(period)}&select=player_id,name,score&order=score.desc,updated_at.asc&limit=50`;
     const res = await lbFetch(query);
-    if (!res.ok) throw new Error('load failed');
+    if (!res.ok) throw new Error(await lbErrText(res));
     const rows = await res.json();
     if (token !== lb.loadToken) return;
-    note.textContent = meta.note;
-    if (!rows.length) { note.textContent = `${meta.note} No scores yet. Be the first!`; return; }
+    note.textContent = rows.length ? meta.note : `${meta.note} No scores yet. Be the first!`;
     const me = (lbLoadSession() || {}).user_id;
     rows.forEach((row, i) => list.appendChild(lbRow(i + 1, row.name, row.score, board, row.player_id === me)));
-    if (me && !rows.some((row) => row.player_id === me)) {
+    if (me && rows.length && !rows.some((row) => row.player_id === me)) {
       try {
         const base = `/rest/v1/scores?board=eq.${board}&period=eq.${encodeURIComponent(period)}`;
         const mine = await (await lbFetch(`${base}&player_id=eq.${me}&select=name,score`)).json();
@@ -8542,34 +8695,148 @@ async function lbShow(board) {
       } catch (error) { /* own rank is optional */ }
     }
   } catch (error) {
-    if (token === lb.loadToken) note.textContent = "Couldn't reach the leaderboard right now. The rest of the game still works.";
+    if (token === lb.loadToken) note.textContent = `Couldn't load the leaderboard: ${error.message}`;
   }
 }
 
-function lbEnter() {
-  lbRenderName();
+async function lbAfterAuth() {
+  lb.pending = {};
+  lb.upload = {};
+  lbEl('#lb-password').value = '';
+  lbNotice('');
+  lbRenderAccount();
   lbShow(lb.board);
   lbSyncAll();
-  lbFlush().then((jobs) => { if (jobs.length && state.activeTab === 'leaderboard') lbShow(lb.board); });
+  await lbFlush();
+  lbRenderMine();
+  lbShow(lb.board);
+}
+
+function lbEnter() {
+  lbRenderAccount();
+  lbShow(lb.board);
+  if (!lbLoadSession() || lb.recoveryToken) return;
+  lbEnsureProfile()
+    .then((name) => {
+      if (!name) { lbRenderAccount(); return []; }
+      lbRenderAccount();
+      lbSyncAll();
+      return lbFlush();
+    })
+    .then((jobs) => { if (jobs.length && state.activeTab === 'leaderboard') lbShow(lb.board); })
+    .catch(() => lbRenderMine());
 }
 
 function lbInit() {
-  const input = document.querySelector('#lb-name');
-  const save = () => {
-    const name = lbClean(input.value);
-    if (!name) { lbSetStatus('Enter a name (1 to 20 characters).'); return; }
-    lsSet(LB_NAME_KEY, name);
-    lbRenderName();
-    lbSyncAll();
-    lbFlush().then(() => lbShow(lb.board));
-  };
-  document.querySelector('#lb-name-save').addEventListener('click', save);
-  input.addEventListener('keydown', (event) => { if (event.key === 'Enter') save(); });
-  document.querySelector('#lb-boards').addEventListener('click', (event) => {
+  const busy = (button, on) => { button.disabled = on; };
+
+  async function authGo() {
+    const email = lbEl('#lb-email').value.trim();
+    const password = lbEl('#lb-password').value;
+    const username = lbEl('#lb-username').value.trim();
+    const signup = lb.authMode === 'signup';
+    if (!LB_EMAIL_RE.test(email)) { lbNotice('Enter a valid email address.', true); return; }
+    if (password.length < 8) { lbNotice('Your password needs at least 8 characters.', true); return; }
+    if (signup && !LB_USERNAME_RE.test(username)) { lbNotice('Usernames are 3 to 20 characters: letters, numbers, _ . or -', true); return; }
+    const button = lbEl('#lb-auth-go');
+    busy(button, true);
+    try {
+      if (signup) {
+        const result = await lbSignUp(email, username, password);
+        if (result === 'confirm') {
+          lb.authMode = 'login';
+          lbRenderAccount();
+          lbNotice('Account created! Check your email for a confirmation link, then log in.');
+          return;
+        }
+      } else {
+        await lbLogIn(email, password);
+      }
+      await lbAfterAuth();
+    } catch (error) {
+      lbNotice(error.message, true);
+    } finally { busy(button, false); }
+  }
+
+  lbEl('#lb-auth-go').addEventListener('click', authGo);
+  ['#lb-email', '#lb-username', '#lb-password'].forEach((id) => lbEl(id).addEventListener('keydown', (event) => { if (event.key === 'Enter') authGo(); }));
+  lbEl('#lb-auth').addEventListener('click', (event) => {
+    const button = event.target.closest('button[data-auth]');
+    if (!button) return;
+    lb.authMode = button.dataset.auth;
+    lbNotice('');
+    lbRenderAccount();
+  });
+
+  lbEl('#lb-forgot').addEventListener('click', async () => {
+    const email = lbEl('#lb-email').value.trim();
+    if (!LB_EMAIL_RE.test(email)) { lbNotice('Type your email address above first.', true); return; }
+    try {
+      const res = await lbFetch('/auth/v1/recover', { method: 'POST', body: JSON.stringify({ email }) });
+      if (!res.ok && res.status !== 429) throw new Error(await lbErrText(res));
+      lbNotice(res.status === 429 ? 'Please wait a minute before asking for another email.' : 'If that email has an account, a reset link is on its way.', res.status === 429);
+    } catch (error) { lbNotice(error.message, true); }
+  });
+
+  async function setupGo() {
+    const username = lbEl('#lb-setup-name').value.trim();
+    if (!LB_USERNAME_RE.test(username)) { lbNotice('Usernames are 3 to 20 characters: letters, numbers, _ . or -', true); return; }
+    const button = lbEl('#lb-setup-go');
+    busy(button, true);
+    try {
+      const session = await lbSession();
+      if (!session) throw new Error('Please log in again.');
+      if ((await lbRpc('username_available', { p_username: username })) !== true) throw new Error('That username is already taken.');
+      await lbRpc('create_profile', { p_username: username }, session.access_token);
+      lbRememberName(session, username);
+      await lbAfterAuth();
+    } catch (error) { lbNotice(error.message, true); } finally { busy(button, false); }
+  }
+  lbEl('#lb-setup-go').addEventListener('click', setupGo);
+  lbEl('#lb-setup-name').addEventListener('keydown', (event) => { if (event.key === 'Enter') setupGo(); });
+
+  document.querySelectorAll('[data-lb-logout]').forEach((button) => button.addEventListener('click', lbLogOut));
+
+  async function newPassGo() {
+    const password = lbEl('#lb-newpass').value;
+    if (password.length < 8) { lbNotice('Your password needs at least 8 characters.', true); return; }
+    const button = lbEl('#lb-newpass-go');
+    busy(button, true);
+    try {
+      const res = await lbFetch('/auth/v1/user', { method: 'PUT', body: JSON.stringify({ password }) }, lb.recoveryToken);
+      if (!res.ok) throw new Error(await lbErrText(res));
+      lb.recoveryToken = '';
+      lbEl('#lb-newpass').value = '';
+      lb.authMode = 'login';
+      lbRenderAccount();
+      lbNotice('Password updated. Log in with your new password.');
+    } catch (error) { lbNotice(error.message, true); } finally { busy(button, false); }
+  }
+  lbEl('#lb-newpass-go').addEventListener('click', newPassGo);
+  lbEl('#lb-newpass').addEventListener('keydown', (event) => { if (event.key === 'Enter') newPassGo(); });
+
+  lbEl('#lb-boards').addEventListener('click', (event) => {
     const button = event.target.closest('button[data-board]');
     if (button) lbShow(button.dataset.board);
   });
-  document.querySelector('#lb-refresh').addEventListener('click', () => lbShow(lb.board));
+  lbEl('#lb-refresh').addEventListener('click', () => {
+    if (lbLoadSession()) { lbSyncAll(); lbFlush().then(() => { lbRenderMine(); lbShow(lb.board); }); }
+    lbShow(lb.board);
+  });
+
+  // Password-reset links bring the player back with a token in the address.
+  const hash = new URLSearchParams(location.hash.replace(/^#/, ''));
+  const goToTab = () => setTimeout(() => { const tab = lbEl('.tab[data-tab="leaderboard"]'); if (tab) tab.click(); }, 0);
+  if (hash.get('type') === 'recovery' && hash.get('access_token')) {
+    lb.recoveryToken = hash.get('access_token');
+    history.replaceState(null, '', location.pathname + location.search);
+    goToTab();
+  } else if (hash.get('error_description')) {
+    const message = hash.get('error_description').replace(/\+/g, ' ');
+    history.replaceState(null, '', location.pathname + location.search);
+    goToTab();
+    setTimeout(() => lbNotice(message, true), 50);
+  }
 }
 
 renderPlayFilters();
